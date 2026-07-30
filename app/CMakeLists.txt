@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.4.1)
 
 project(melonDS-android-frontend)
 
+option(
+        MELONDS_PHASE0_MULTIPLAYER
+        "Compile the non-production multi-device multiplayer feasibility slice"
+        OFF
+)
+
+if (MELONDS_PHASE0_MULTIPLAYER)
+    add_compile_definitions(MELONDS_PHASE0_MULTIPLAYER=1)
+else()
+    add_compile_definitions(MELONDS_PHASE0_MULTIPLAYER=0)
+endif()
+
 add_compile_definitions(MELONDS_GL_HEADER=<GLES3/gl32.h>)
 add_compile_definitions(EGL_EGLEXT_PROTOTYPES)
 
@@ -62,6 +74,21 @@ add_library(
         ${ANDROID-CPP}/renderer/ScreenshotRenderer.cpp
         ${ANDROID-CPP}/retroachievements/RetroAchievementsManager.cpp
 )
+
+if (MELONDS_PHASE0_MULTIPLAYER)
+    target_sources(
+            melonDS-android-frontend
+            PRIVATE
+            ${ANDROID-CPP}/multiplayer/Phase0EnetWorker.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0CoreRelayHarnessJNI.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0LanCoreAdapter.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0SessionRouter.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0SessionRuntime.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0TraceRecorder.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0TransportJNI.cpp
+            ${ANDROID-CPP}/multiplayer/Phase0ProtocolCodec.cpp
+    )
+endif()
 
 target_include_directories(melonDS-android-frontend PUBLIC
         ${ANDROID-CPP}/

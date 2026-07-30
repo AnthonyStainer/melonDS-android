@@ -1,6 +1,13 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+val phase0MultiplayerEnabled = providers.gradleProperty("melonds.phase0Multiplayer")
+    .map { value ->
+        value.toBooleanStrictOrNull()
+            ?: throw GradleException("melonds.phase0Multiplayer must be either true or false")
+    }
+    .orElse(false)
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
@@ -37,11 +44,18 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags("-std=c++17 -Wno-write-strings")
+                arguments("-DMELONDS_PHASE0_MULTIPLAYER=${if (phase0MultiplayerEnabled.get()) "ON" else "OFF"}")
             }
         }
+        buildConfigField(
+            "boolean",
+            "PHASE0_MULTIPLAYER_ENABLED",
+            phase0MultiplayerEnabled.get().toString()
+        )
         vectorDrawables.useSupportLibrary = true
     }
     buildFeatures {
+        buildConfig = true
         viewBinding = true
         compose = true
     }
